@@ -7,6 +7,7 @@ public class bubble {
 
     private boolean active = false;
     private Point location = new Point(0, 0);
+
     private int radius = 0;
     private Color color = Color.black;
 

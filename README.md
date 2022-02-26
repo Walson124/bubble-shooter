@@ -1,6 +1,9 @@
 # bubble shooter
  Bubble Shooter Game Remake
+    - Just for fun, made from scratch
 
- Made this in 2019 but redoing it because my email with access to the code got deleted
-
- bubble array is 17 columns by 16 rows
+ bubble.java is home of bubble object
+ driver.java is where JFrame and JPanels are made, things are instantiated, etc
+ mainPanel.java is the main JPanel, paints everything on the main screen (game, buttons, arrow, queue, etc.)
+ shooter.java contains information for arrow, and timer + info for projectile
+    - object is instantiated in driver.java, then sent to mainPanel.java to be drawn
