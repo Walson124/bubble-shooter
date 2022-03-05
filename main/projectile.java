@@ -37,7 +37,7 @@ public class projectile extends bubble {
 
     public boolean isShooting;
     public boolean isTouching;
-    public boolean gameOver = false;
+    public boolean gameOver = false, gameWon = false;
 
     private Set<Point> sameColor = new HashSet<>();
     private Set<Point> safeBubbles = new HashSet<>();
@@ -143,23 +143,24 @@ public class projectile extends bubble {
             bubbleArray[(int) data[0]][(int) data[1]].setActive(true);
 
             gameOver();
-
-            findSameColor((int) data[0], (int) data[1], true);
-            if (sameColor.size() >= 3) {
-                for (Point p : sameColor) {
-                    bubbleArray[p.x][p.y].setActive(false);
-                }
-                popLoose();
-            } else
-                penalty();
+            if (!gameOver) {
+                findSameColor((int) data[0], (int) data[1], true);
+                if (sameColor.size() >= 3) {
+                    for (Point p : sameColor) {
+                        bubbleArray[p.x][p.y].setActive(false);
+                    }
+                    popLoose();
+                } else
+                    penalty();
+            }
             resetProjectile();
         }
 
     }
 
-    private void gameOver(){
-        for (int i = 0; i < bubbleArray.length; i++){
-            if (bubbleArray[i][bubbleArray[0].length - 1].isActive()){
+    private void gameOver() {
+        for (int i = 0; i < bubbleArray.length; i++) {
+            if (bubbleArray[i][bubbleArray[0].length - 1].isActive()) {
                 gameOver = true;
                 resetProjectile();
             }

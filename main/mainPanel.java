@@ -76,10 +76,10 @@ public class mainPanel extends JPanel {
         drawAbout(g);
 
         if (projectile.gameOver) {
-            setBackground(Color.red);
-            timer.stop();
+            drawGameOver(g, false);
+        } else if (projectile.gameWon) {
+            drawGameOver(g, true);
         } else
-
             setBackground(new Color(198, 198, 255));
 
     }
@@ -310,6 +310,25 @@ public class mainPanel extends JPanel {
         for (JTextField temp : aboutText)
             temp.setVisible(showAbout);
 
+    }
+
+    public void drawGameOver(Graphics g, boolean won) {
+
+        JTextField gameOverTextField = new JTextField();
+
+        if (won) {
+            setBackground(Color.green);
+            gameOverTextField.setText("Congratulations");
+        } else {
+            setBackground(Color.red);
+            gameOverTextField.setText("Game Over");
+        }
+
+        gameOverTextField.setEditable(false);
+        gameOverTextField.setFont(new Font("Sans Serif", Font.BOLD, 30));
+        gameOverTextField.setVisible(true);
+
+        timer.stop();
     }
 
     public void drawBubble(Graphics g, bubble b) {
