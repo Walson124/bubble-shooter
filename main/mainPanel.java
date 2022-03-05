@@ -16,6 +16,7 @@ import java.awt.Point;
 
 public class mainPanel extends JPanel {
 
+    // public variables
     public bubble[][] bubbleArray = null;
     public bubble bubbleQueue = null;
     public Point[] arrow = new Point[] { new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0) };
@@ -29,6 +30,7 @@ public class mainPanel extends JPanel {
     public JTextField[] helpText = new JTextField[17], aboutText = new JTextField[1];
     public int penalties = 5;
 
+    // private variables
     final int interval = 10; // milliseconds
     private Timer timer = new Timer(interval, new ActionListener() {
         @Override
@@ -36,6 +38,15 @@ public class mainPanel extends JPanel {
             repaint();
         }
     });
+
+    public mainPanel() {
+
+        setupHelp();
+        setupAbout();
+
+        setBackground(new Color(198, 198, 255));
+        startRefresh();
+    }
 
     public void setBubbleArray(bubble[][] bubbleArray) {
         this.bubbleArray = bubbleArray;
@@ -47,15 +58,6 @@ public class mainPanel extends JPanel {
 
     public void setProjectile(projectile projectile) {
         this.projectile = projectile;
-    }
-
-    public mainPanel() {
-
-        setupHelp();
-        setupAbout();
-
-        setBackground(new Color(198, 198, 255));
-        startRefresh();
     }
 
     public void paintComponent(Graphics g) {
@@ -94,16 +96,16 @@ public class mainPanel extends JPanel {
         }
     }
 
-    public void drawBorders(Graphics g) {
-        g.setColor(new Color(225, 225, 225));
-        g.drawRoundRect(9, 9, 525, 480, 10, 10);
-
-        if (helpText[0].isVisible() || aboutText[0].isVisible()) {
-            g.setColor(new Color(198, 198, 255));
-            g.fillRoundRect(20, 20, 500, 460, 30, 30);
-            g.setColor(new Color(225, 225, 225));
-            g.drawRoundRect(20, 20, 500, 460, 30, 30);
+    public void addButtons(JButton[] buttonArr) {
+        for (int i = 0; i < buttonArr.length; i++) {
+            if (buttonArr[i] != null)
+                add(buttonArr[i]);
         }
+    }
+
+    public void drawAbout(Graphics g) {
+        for (JTextField temp : aboutText)
+            temp.setVisible(showAbout);
 
     }
 
@@ -119,6 +121,72 @@ public class mainPanel extends JPanel {
         g2d.drawLine(arrow[1].x, arrow[1].y, arrow[2].x, arrow[2].y);
         g2d.drawLine(arrow[1].x, arrow[1].y, arrow[3].x, arrow[3].y);
 
+    }
+
+    public void drawBorders(Graphics g) {
+        g.setColor(new Color(225, 225, 225));
+        g.drawRoundRect(9, 9, 525, 480, 10, 10);
+
+        if (helpText[0].isVisible() || aboutText[0].isVisible()) {
+            g.setColor(new Color(198, 198, 255));
+            g.fillRoundRect(20, 20, 500, 460, 30, 30);
+            g.setColor(new Color(225, 225, 225));
+            g.drawRoundRect(20, 20, 500, 460, 30, 30);
+        }
+
+    }
+
+    public void drawBubble(Graphics g, bubble b) {
+        if (b.isActive()) {
+            int x = b.getLocation().x;
+            int y = b.getLocation().y;
+            int radius = b.getRadius();
+
+            g.setColor(b.getColor());
+            g.fillOval(x, y, radius, radius);
+
+            g.setColor(b.getSubColor());
+            g.fillOval((int) (x + .05 * radius), (int) y, (int) (.85 * radius), (int) (.85 * radius));
+
+            g.setColor(new Color(225, 225, 225));
+            g.fillPolygon(
+                    new int[] { (int) (x + .3 * radius), (int) (x + .2 * radius), (int) (x + .32 * radius),
+                            (int) (x + .4 * radius) },
+                    new int[] { (int) (y + .15 * radius), (int) (y + .25 * radius), (int) (y + .35 * radius),
+                            (int) (y + .15 * radius) },
+                    4);
+            g.fillPolygon(
+                    new int[] { (int) (x + .12 * radius), (int) (x + .15 * radius), (int) (x + .23 * radius),
+                            (int) (x + .22 * radius) },
+                    new int[] { (int) (y + .35 * radius), (int) (y + .5 * radius), (int) (y + .7 * radius),
+                            (int) (y + .45 * radius) },
+                    4);
+
+        }
+    }
+
+    public void drawGameOver(Graphics g, boolean won) {
+
+        JTextField gameOverTextField = new JTextField();
+
+        if (won) {
+            setBackground(Color.green);
+            gameOverTextField.setText("Congratulations");
+        } else {
+            setBackground(Color.red);
+            gameOverTextField.setText("Game Over");
+        }
+
+        gameOverTextField.setEditable(false);
+        gameOverTextField.setFont(new Font("Sans Serif", Font.BOLD, 30));
+        gameOverTextField.setVisible(true);
+
+        timer.stop();
+    }
+
+    public void drawHelp(Graphics g) {
+        for (JTextField temp : helpText)
+            temp.setVisible(showHelp);
     }
 
     public void drawMisc(Graphics g) {
@@ -178,11 +246,23 @@ public class mainPanel extends JPanel {
 
     }
 
-    public void addButtons(JButton[] buttonArr) {
-        for (int i = 0; i < buttonArr.length; i++) {
-            if (buttonArr[i] != null)
-                add(buttonArr[i]);
+    public void setupAbout() {
+        Font textFont = new Font("Sans Serif", Font.BOLD, 30);
+
+        for (int i = 0; i < aboutText.length; i++) {
+            aboutText[i] = new JTextField();
+            aboutText[i].setVisible(false);
+            aboutText[i].setOpaque(false);
+            aboutText[i].setEditable(false);
+            aboutText[i].setFont(textFont);
+            aboutText[i].setBorder(javax.swing.BorderFactory.createEmptyBorder());
+            this.add(aboutText[i]);
         }
+
+        aboutText[0].setText("Hi");
+        aboutText[0].setLocation(255, 195);
+        aboutText[0].setSize(100, 100);
+
     }
 
     public void setupHelp() {
@@ -280,84 +360,6 @@ public class mainPanel extends JPanel {
         helpText[16].setLocation(210, 385);
         helpText[16].setSize(200, 100);
 
-    }
-
-    public void drawHelp(Graphics g) {
-        for (JTextField temp : helpText)
-            temp.setVisible(showHelp);
-    }
-
-    public void setupAbout() {
-        Font textFont = new Font("Sans Serif", Font.BOLD, 30);
-
-        for (int i = 0; i < aboutText.length; i++) {
-            aboutText[i] = new JTextField();
-            aboutText[i].setVisible(false);
-            aboutText[i].setOpaque(false);
-            aboutText[i].setEditable(false);
-            aboutText[i].setFont(textFont);
-            aboutText[i].setBorder(javax.swing.BorderFactory.createEmptyBorder());
-            this.add(aboutText[i]);
-        }
-
-        aboutText[0].setText("Hi");
-        aboutText[0].setLocation(255, 195);
-        aboutText[0].setSize(100, 100);
-
-    }
-
-    public void drawAbout(Graphics g) {
-        for (JTextField temp : aboutText)
-            temp.setVisible(showAbout);
-
-    }
-
-    public void drawGameOver(Graphics g, boolean won) {
-
-        JTextField gameOverTextField = new JTextField();
-
-        if (won) {
-            setBackground(Color.green);
-            gameOverTextField.setText("Congratulations");
-        } else {
-            setBackground(Color.red);
-            gameOverTextField.setText("Game Over");
-        }
-
-        gameOverTextField.setEditable(false);
-        gameOverTextField.setFont(new Font("Sans Serif", Font.BOLD, 30));
-        gameOverTextField.setVisible(true);
-
-        timer.stop();
-    }
-
-    public void drawBubble(Graphics g, bubble b) {
-        if (b.isActive()) {
-            int x = b.getLocation().x;
-            int y = b.getLocation().y;
-            int radius = b.getRadius();
-
-            g.setColor(b.getColor());
-            g.fillOval(x, y, radius, radius);
-
-            g.setColor(b.getSubColor());
-            g.fillOval((int) (x + .05 * radius), (int) y, (int) (.85 * radius), (int) (.85 * radius));
-
-            g.setColor(new Color(225, 225, 225));
-            g.fillPolygon(
-                    new int[] { (int) (x + .3 * radius), (int) (x + .2 * radius), (int) (x + .32 * radius),
-                            (int) (x + .4 * radius) },
-                    new int[] { (int) (y + .15 * radius), (int) (y + .25 * radius), (int) (y + .35 * radius),
-                            (int) (y + .15 * radius) },
-                    4);
-            g.fillPolygon(
-                    new int[] { (int) (x + .12 * radius), (int) (x + .15 * radius), (int) (x + .23 * radius),
-                            (int) (x + .22 * radius) },
-                    new int[] { (int) (y + .35 * radius), (int) (y + .5 * radius), (int) (y + .7 * radius),
-                            (int) (y + .45 * radius) },
-                    4);
-
-        }
     }
 
     public void startRefresh() {

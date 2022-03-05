@@ -11,6 +11,17 @@ import javax.swing.Timer;
 
 public class projectile extends bubble {
 
+    // public variables
+    public int directionX, directionY, speed = 10;
+    public double angle;
+
+    public boolean isShooting, isTouching;
+    public boolean gameOver = false, gameWon = false;
+
+    // private variables
+    private int penalties = 5;
+    private double actualX, actualY;
+
     private bubble[][] bubbleArray = null;
     private bubble bubbleQueue = new bubble(true, new Point(20, 501), 28, Color.black);
 
@@ -26,19 +37,6 @@ public class projectile extends bubble {
     });
 
     private Point start = new Point();
-
-    public int directionX, directionY;
-    public double angle;
-    public int speed = 10;
-
-    private int penalties = 5;
-
-    private double actualX, actualY;
-
-    public boolean isShooting;
-    public boolean isTouching;
-    public boolean gameOver = false, gameWon = false;
-
     private Set<Point> sameColor = new HashSet<>();
     private Set<Point> safeBubbles = new HashSet<>();
 
@@ -83,35 +81,6 @@ public class projectile extends bubble {
         this.penalties = penalties;
     }
 
-    public void resetProjectile() {
-        timer.stop();
-        this.setLocation(new Point(267 - 14, 515 - 14));
-        this.setStart(new Point(267, 515));
-        this.setRadius(28);
-        this.setColor(bubbleQueue.getColor());
-        this.setSubColor(bubbleQueue.getSubColor());
-        this.setActive(true);
-        this.sameColor = new HashSet<>();
-        this.safeBubbles = new HashSet<>();
-        isShooting = false;
-        isTouching = false;
-        bubbleQueue.setColorCode((int) (Math.random() * 7));
-    }
-
-    public void shoot() {
-        this.isShooting = true;
-        this.actualX = this.getLocation().getX();
-        this.actualY = this.getLocation().getY();
-        this.angle = calculateAngle();
-        timer.start();
-    }
-
-    private void move() {
-        actualX += (speed * Math.cos(angle));
-        actualY -= (speed * Math.sin(angle));
-        this.setLocation(new Point((int) actualX, (int) actualY));
-    }
-
     private double calculateAngle() {
         double temp = Math.atan(
                 (double) (this.start.getY() - directionY)
@@ -120,6 +89,12 @@ public class projectile extends bubble {
             temp = ((Math.PI / 2) - Math.abs(temp)) + Math.PI / 2;
 
         return temp;
+    }
+
+    private double calculateDistance(Point p1, Point p2) {
+        int xDiff = p1.x - p2.x;
+        int yDiff = p1.y - p2.y;
+        return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
     }
 
     private void checkBounds() {
@@ -156,47 +131,6 @@ public class projectile extends bubble {
             resetProjectile();
         }
 
-    }
-
-    private void gameOver() {
-        for (int i = 0; i < bubbleArray.length; i++) {
-            if (bubbleArray[i][bubbleArray[0].length - 1].isActive()) {
-                gameOver = true;
-                resetProjectile();
-            }
-        }
-    }
-
-    private void penalty() {
-        penalties -= 1;
-        if (penalties == -1) {
-            for (int i = 0; i < bubbleArray.length; i++) {
-                for (int j = bubbleArray[0].length - 1; j >= 0; j--) {
-                    if (j == 0) {
-                        bubbleArray[i][j].setColor(bubbleArray[i][j].randColor());
-                    } else {
-                        bubbleArray[i][j].setColor(bubbleArray[i][j - 1].getColor());
-                        bubbleArray[i][j].setSubColor(bubbleArray[i][j - 1].getSubColor());
-                        bubbleArray[i][j].setActive(bubbleArray[i][j - 1].isActive());
-                    }
-                }
-            }
-            penalties = (int) (Math.random() * 4) + 2;
-            popLoose();
-            gameOver();
-        }
-    }
-
-    private void popLoose() {
-        // popping loose bubbles
-        for (int i = 0; i < bubbleArray.length; i++)
-            findSafe(i, 0);
-        for (int i = 0; i < bubbleArray.length; i++) {
-            for (int j = 0; j < bubbleArray[i].length; j++) {
-                if (!safeBubbles.contains(new Point(i, j)))
-                    bubbleArray[i][j].setActive(false);
-            }
-        }
     }
 
     private void findSameColor(int i, int j, boolean searchActive) {
@@ -258,10 +192,74 @@ public class projectile extends bubble {
         return data;
     }
 
-    private double calculateDistance(Point p1, Point p2) {
-        int xDiff = p1.x - p2.x;
-        int yDiff = p1.y - p2.y;
-        return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+    private void gameOver() {
+        for (int i = 0; i < bubbleArray.length; i++) {
+            if (bubbleArray[i][bubbleArray[0].length - 1].isActive()) {
+                gameOver = true;
+                resetProjectile();
+            }
+        }
+    }
+
+    private void move() {
+        actualX += (speed * Math.cos(angle));
+        actualY -= (speed * Math.sin(angle));
+        this.setLocation(new Point((int) actualX, (int) actualY));
+    }
+
+    private void penalty() {
+        penalties -= 1;
+        if (penalties == -1) {
+            for (int i = 0; i < bubbleArray.length; i++) {
+                for (int j = bubbleArray[0].length - 1; j >= 0; j--) {
+                    if (j == 0) {
+                        bubbleArray[i][j].setColor(bubbleArray[i][j].randColor());
+                    } else {
+                        bubbleArray[i][j].setColor(bubbleArray[i][j - 1].getColor());
+                        bubbleArray[i][j].setSubColor(bubbleArray[i][j - 1].getSubColor());
+                        bubbleArray[i][j].setActive(bubbleArray[i][j - 1].isActive());
+                    }
+                }
+            }
+            penalties = (int) (Math.random() * 4) + 2;
+            popLoose();
+            gameOver();
+        }
+    }
+
+    private void popLoose() {
+        // popping loose bubbles
+        for (int i = 0; i < bubbleArray.length; i++)
+            findSafe(i, 0);
+        for (int i = 0; i < bubbleArray.length; i++) {
+            for (int j = 0; j < bubbleArray[i].length; j++) {
+                if (!safeBubbles.contains(new Point(i, j)))
+                    bubbleArray[i][j].setActive(false);
+            }
+        }
+    }
+
+    public void resetProjectile() {
+        timer.stop();
+        this.setLocation(new Point(267 - 14, 515 - 14));
+        this.setStart(new Point(267, 515));
+        this.setRadius(28);
+        this.setColor(bubbleQueue.getColor());
+        this.setSubColor(bubbleQueue.getSubColor());
+        this.setActive(true);
+        this.sameColor = new HashSet<>();
+        this.safeBubbles = new HashSet<>();
+        isShooting = false;
+        isTouching = false;
+        bubbleQueue.setColorCode((int) (Math.random() * 7));
+    }
+
+    public void shoot() {
+        this.isShooting = true;
+        this.actualX = this.getLocation().getX();
+        this.actualY = this.getLocation().getY();
+        this.angle = calculateAngle();
+        timer.start();
     }
 
 }
